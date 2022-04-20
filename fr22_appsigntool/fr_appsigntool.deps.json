@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "fr_appsigntool/1.0.4": {
+        "runtime": {
+          "fr_appsigntool.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "fr_appsigntool/1.0.4": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
