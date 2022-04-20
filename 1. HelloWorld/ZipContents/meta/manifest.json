@@ -1,0 +1,12 @@
+{
+  "name": "HelloWorld",
+  "version": "1.0.0",
+  "startup": {
+    "exec_start": "mono bin/HelloWorld.exe",
+    "depends": {
+      "plugins": [
+        "mono-api-4.8"
+      ]
+    }
+  }
+}
