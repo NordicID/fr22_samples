@@ -1,0 +1,13 @@
+{
+  "name": "RpcWebUI",
+  "version": "1.0.0",
+  "startup": {
+    "exec_start": "mono bin/RpcWebUI.exe",
+    "default_autostart": true,
+    "depends": {
+      "plugins": [
+        "mono-api-4.8"
+      ]
+    }
+  }
+}
