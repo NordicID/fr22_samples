@@ -362,6 +362,10 @@ namespace RfidSample
         #endregion
         void StartTagStream()
         {
+            // TODO: fix when NUR_OPFLAGS_EN_PHASE_DIFF/NUR_DC_PHASEDIFF has been added to NurApiDotNet
+            // tag phase diff support (NUR_OPFLAGS_EN_PHASE_DIFF = (1 << 17)) isn't yet available in
+            // NurApiDotNet; just assume it is supported in the NUR module and turn it on
+            _nur.OpFlags |= (1 << 17);
             _nur.StartInventoryStream();
         }
     }
