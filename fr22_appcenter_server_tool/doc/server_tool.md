@@ -13,5 +13,5 @@ See [file structure](server_tool_file_structure.md)
 - Add additional system plugin information into meta/sys/
 - Put the firmware packages into repo/fw/
 - Add firmware information into meta/fw/
-- Run tools/app-center.py
+- Run [app-center.py](../app-center.py)
 - Either copy repo/ or unzip repo.zip to the web server
