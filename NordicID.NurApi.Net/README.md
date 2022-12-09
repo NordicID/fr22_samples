@@ -1,0 +1,2 @@
+- NordicID.NurApi.Net.dll is temporarily here, until found in nuget.org
+- Used in net6.0 samples

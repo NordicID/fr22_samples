@@ -12,22 +12,6 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <PublishWizardCompleted>true</PublishWizardCompleted>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,21 +28,9 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;USE_MONO</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestCertificateThumbprint>245E8FC4D30A107959FF0FD678B8B3ADD5EE114F</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestKeyFile>RfidSample_TemporaryKey.pfx</ManifestKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -76,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="RfidSample_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NidRpc">
@@ -99,18 +70,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="DeleteBuildArtifacts" AfterTargets="Build">
-    <Message Text="Removing old ZipContent/bin files" Importance="High" />
-    <ItemGroup>
-      <FilesToDelete Include="$(ProjectDir)\ZipContents\bin\*" />
-    </ItemGroup>
-    <Delete Files="@(FilesToDelete)" />
-  </Target>
-  <Target Name="CopyBuildArtifacts" AfterTargets="DeleteBuildArtifacts">
-    <Message Text="Copying build artifacts to ZipContents/bin" Importance="High" />
-    <ItemGroup>
-      <FilesToCopy Include="$(ProjectDir)\bin\$(Configuration)\*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ProjectDir)\ZipContents\bin" />
-  </Target>
+  <PropertyGroup>
+    <PostBuildEvent>PowerShell -NoProfile -ExecutionPolicy unrestricted -file "$(ProjectDir)\..\fr22_vs_appziptool\build.ps1" "$(ProjectDir)\ZipContents" "$(ProjectName)" "$(TargetPath)" "$(TargetDir)\" "$(ProjectDir)\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Configurations>Debug;Release;Release_FR22</Configurations>
+  </PropertyGroup>
+
+  <Target Condition="'$(Configuration)' == 'Release_FR22'" Name="GenerateFr22Zip" AfterTargets="Publish">
+    <Exec Command="PowerShell -NoProfile -ExecutionPolicy unrestricted -file &quot;$(SolutionDir)\..\fr22_vs_appziptool\build.ps1&quot; &quot;$(SolutionDir)\ZipContents&quot; &quot;$(ProjectName)&quot; &quot;$(TargetPath)&quot; &quot;$(PublishDir)\&quot; &quot;$(SolutionDir)\&quot;" />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="NordicID.NurApi.Net">
+      <HintPath>..\..\NordicID.NurApi.Net\NordicID.NurApi.Net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

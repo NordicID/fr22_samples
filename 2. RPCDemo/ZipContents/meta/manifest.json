@@ -1,8 +1,8 @@
 {
-  "name": "RPCdemo",
-  "version": "1.0.0",
+  "name": "@APPNAME@",
+  "version": "@APPVERSION@",
   "startup": {
-    "exec_start": "mono bin/RPCDemo.exe",
+    "exec_start": "mono bin/@APPEXEC@",
     "default_autostart": true,
     "depends": {
       "plugins": [

@@ -1,8 +1,8 @@
 {
-  "name": "RfidSample",
-  "version": "1.0.1",
+  "name": "@APPNAME@",
+  "version": "@APPVERSION@",
   "startup": {
-    "exec_start": "mono bin/RfidSample.exe",
+    "exec_start": "mono bin/@APPEXEC@",
     "default_autostart": true,
     "depends": {
       "plugins": [

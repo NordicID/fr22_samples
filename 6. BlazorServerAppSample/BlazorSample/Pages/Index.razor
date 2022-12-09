@@ -1,0 +1,148 @@
+﻿@page "/"
+@using NurApiDotNet;
+
+@implements IDisposable;
+
+@inject NurApi NurApiInst
+
+<PageTitle>Connection</PageTitle>
+
+<p>
+    <input @bind="ConnectionUri" @bind:event="oninput" />
+    <button @onclick="Connect">
+        @ConnectButtonText
+    </button>
+</p>
+
+<p>
+    <label>@ConnectionStatusText</label>
+</p>
+
+@if (FoundDevices == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Uri</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var uri in FoundDevices)
+            {
+                <tr>
+                    <td @onclick="()=>SelectUri(uri)">@uri.ToString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<Uri>? FoundDevices;
+
+    private string ConnectionUri { get; set; } = string.Empty;
+    private string ConnectionStatusText { get; set; } = string.Empty;
+    private string ConnectButtonText { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        FoundDevices = new List<Uri>();
+        FoundDevices.Add(new Uri("tcp://localhost"));
+
+        NurDeviceDiscovery.Start(DeviceDiscoveryCallback);
+        NurApiInst.ConnectionStatusEvent += NurApiInst_ConnectionStatusEvent;
+
+        NurApiInst_ConnectionStatusEvent(NurApiInst, NurApiInst.ConnectionStatus);
+    }
+
+    public void Dispose()
+    {
+        NurApiInst.ConnectionStatusEvent -= NurApiInst_ConnectionStatusEvent;
+        NurDeviceDiscovery.Stop(DeviceDiscoveryCallback);
+    }
+
+    private void NurApiInst_ConnectionStatusEvent(object? sender, NurTransportStatus e)
+    {
+        NurApi? api = (NurApi?)sender;
+        if (api == null) return;
+
+        if (e == NurTransportStatus.Connected)
+        {
+            try
+            {
+                var info = api.GetReaderInfo();
+                var serial = info.altSerial.Length > 0 ? info.altSerial : info.serial;
+                ConnectionStatusText = $"Connected to {serial}";
+            }
+            catch (Exception ex)
+            {
+                ConnectionStatusText = $"Connected with error {ex.Message}";
+            }
+        }
+        else
+        {
+            ConnectionStatusText = e.ToString();
+        }
+
+        if (e == NurTransportStatus.Disconnected)
+        {
+            ConnectButtonText = "Connect";
+        }
+        else
+        {
+            ConnectButtonText = "Disconnect";
+        }
+
+        this.InvokeAsync(() => StateHasChanged());
+    }
+
+    void SelectUri(Uri uri)
+    {
+        ConnectionUri = uri.ToString();
+    }
+
+    void Connect()
+    {
+        try
+        {
+            if (NurApiInst.ConnectionStatus == NurTransportStatus.Disconnected)
+            {
+                Uri uri = new Uri(ConnectionUri);
+                NurApiInst.Connect(uri);
+            }
+            else
+            {
+                NurApiInst.Disconnect();
+            }
+        }
+        catch (Exception ex)
+        {
+            ConnectionStatusText = $"ERROR: {ex.Message}";
+        }
+    }
+
+    void DeviceDiscoveryCallback(object sender, NurDeviceDiscoveryEventArgs args)
+    {
+        if (FoundDevices == null)
+            return;
+
+        Uri? item = FoundDevices.FirstOrDefault(u => u.ToString() == args.Uri.ToString());
+
+        if (args.Visible)
+        {
+            FoundDevices.Add(args.Uri);
+        }
+        else if (item != null)
+        {
+            FoundDevices.Remove(item);
+        }
+
+        this.InvokeAsync(() => StateHasChanged());
+    }
+}

@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:AvaloniaUISample.ViewModels"
+			 xmlns:local="clr-namespace:AvaloniaUISample.Views"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+             x:Class="AvaloniaUISample.Views.InventoryPage">
+
+	<Design.DataContext>
+		<vm:InventoryPageViewModel/>
+	</Design.DataContext>
+
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="*"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+			</Grid.RowDefinitions>
+
+			<StackPanel Grid.Row="0" Spacing="5" Orientation="Horizontal">
+				<Button IsEnabled="{Binding InvButtonState}" Command="{Binding InventoryCmd}" Content="{Binding InvButtonText}"/>
+				<Button IsEnabled="{Binding InvButtonState}" Command="{Binding InventoryStreamCmd}" Content="{Binding InvStreamButtonText}"/>
+			</StackPanel>
+
+			<TextBlock Grid.Row="1" Padding="0,10,0,10" VerticalAlignment="Center" Foreground="Black" Text="{Binding InventoryInfo}"/>
+
+			<TextBlock Grid.Row="2" Padding="0,10,0,10" VerticalAlignment="Center" Foreground="Black" Text="Inventory Results"/>
+
+			<Grid Grid.Row="3" ColumnDefinitions="*,Auto">
+				<DataGrid Grid.Column="0" IsReadOnly="True" SelectionMode="Single" AutoGenerateColumns="False" Items="{Binding InventoriedTags}" SelectedItem="{Binding SelectedItem}">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="EPC"  Binding="{Binding EPC}"/>
+						<DataGridTextColumn Header="Rssi" Binding="{Binding RSSI}" />
+						<DataGridTextColumn Header="ReadCount" Binding="{Binding ReadCount}" />
+					</DataGrid.Columns>
+				</DataGrid>
+				<local:SingleTagInfoControl Name="TagInfo" Grid.Column="1"/>
+			</Grid>
+		</Grid>
+
+</UserControl>

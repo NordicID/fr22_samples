@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
+    <TrimMode>copyused</TrimMode>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <Configurations>Debug;Release;Release_FR22</Configurations>
+    <Version>$(VersionPrefix)1.0.1</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_FR22|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Assets\Fonts\" />
+    <AvaloniaResource Include="Assets\**" />
+    <None Remove=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Microcharts.Avalonia\Microcharts.Avalonia.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--This helps with theme dll-s trimming.
+	If you will publish your application in self-contained mode with p:PublishTrimmed=true and it will use Fluent theme Default theme will be trimmed from the output and vice versa.
+	https://github.com/AvaloniaUI/Avalonia/issues/5593 -->
+    <TrimmableAssembly Include="Avalonia.Themes.Fluent" />
+    <TrimmableAssembly Include="Avalonia.Themes.Default" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.18" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.18" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.18" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
+    <PackageReference Include="MessageBox.Avalonia-mainthread" Version="2.0.1" />
+    <PackageReference Include="Microcharts" Version="0.9.5.9" />
+    <PackageReference Include="XamlNameReferenceGenerator" Version="1.4.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="NordicID.NurApi.Net">
+      <HintPath>..\..\NordicID.NurApi.Net\NordicID.NurApi.Net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\ConnectionPage.axaml.cs">
+      <DependentUpon>ConnectionPage.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <Target Condition="'$(Configuration)' == 'Release_FR22'" Name="GenerateFr22Zip" AfterTargets="Publish">
+    <Exec Command="PowerShell -NoProfile -ExecutionPolicy unrestricted -file &quot;$(SolutionDir)\..\fr22_vs_appziptool\build.ps1&quot; &quot;$(SolutionDir)\ZipContents&quot; &quot;$(ProjectName)&quot; &quot;$(TargetPath)&quot; &quot;$(PublishDir)\&quot; &quot;$(SolutionDir)\&quot;" />	
+  </Target>
+</Project>

@@ -1,0 +1,198 @@
+﻿@page "/inventory"
+@using NurApiDotNet;
+
+@implements IDisposable;
+
+@inject NurApi NurApiInst
+
+<PageTitle>Inventory</PageTitle>
+
+<h1>Inventory</h1>
+
+<p>
+    <button disabled="@InvButtonDisabled" @onclick="InvStream">
+        @InvStreamButtonText
+    </button>
+</p>
+
+<p>
+    <label>@InvStatusText</label>
+</p>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>EPC</th>
+            <th>Rssi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pair in InventoriedTags)
+        {
+            <tr>
+                <td>@pair.Key</td>
+                <td>@pair.Value.rssi.ToString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Dictionary<string, NurApi.Tag> InventoriedTags = new Dictionary<string, NurApi.Tag>();
+
+    private string InvStreamButtonText { get; set; } = "Start Inventory Stream";
+    private bool InvButtonDisabled { get; set; } = false;
+    private string InvStatusText { get; set; } = string.Empty;
+
+    private System.Threading.Timer? mUiUpdateTimer;
+
+    private bool mStreamRunning = false;
+    private bool mNeedUiUpdate = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        NurApiInst.ConnectionStatusEvent += NurApi_ConnectionStatusEvent;
+        NurApiInst.InventoryStreamEvent += NurApi_InventoryStreamEvent;
+
+        InvButtonDisabled = !NurApiInst.IsConnected();
+        StateHasChanged();
+
+        // UI update timer for inventory data
+        mUiUpdateTimer = new System.Threading.Timer(async (object? stateInfo) =>
+        {
+            if (mNeedUiUpdate)
+                await this.InvokeAsync(() => StateHasChanged());
+        }, null, 250, 250);
+    }
+
+    public async void Dispose()
+    {
+        mUiUpdateTimer?.Dispose();
+        NurApiInst.InventoryStreamEvent -= NurApi_InventoryStreamEvent;
+        NurApiInst.ConnectionStatusEvent -= NurApi_ConnectionStatusEvent;
+
+        if (NurApiInst.IsConnected() && mStreamRunning)
+        {
+            // Stop stream in own task
+            await Task.Run(() =>
+            {
+                // Stop
+                NurApiInst.StopInventoryStream();
+                // Reset zero readings
+                NurApiInst.EnableInvStreamZeros = false;
+            });
+        }
+    }
+
+    private void NurApi_InventoryStreamEvent(object? sender, NurApi.InventoryStreamEventArgs e)
+    {
+        NurApi.TagStorage ts = NurApiInst.GetTagStorage();
+        // Access to NurApi tag storage must be synchronized
+        lock (ts)
+        {
+            lock (InventoriedTags)
+            {
+                foreach (NurApi.Tag tag in ts)
+                {
+                    if (!InventoriedTags.ContainsKey(tag.GetEpcString()))
+                    {
+                        // New tag added
+                        InventoriedTags.Add(tag.GetEpcString(), tag);
+                    } 
+                    else
+                    {
+                        InventoriedTags[tag.GetEpcString()] = tag;
+                    }
+                }
+            }
+            InvStatusText = $"{InventoriedTags.Count} unique tags";
+            mNeedUiUpdate = (ts.Count > 0);
+            ts.Clear();
+        }
+
+        // Restart stream if needed
+        if (mStreamRunning && e.data.stopped)
+        {
+            try
+            {
+                NurApiInst.StartInventoryStream();
+            }
+            catch (Exception ex)
+            {
+                // This should not ever happen
+                Console.WriteLine(ex);
+            }
+        }        
+    }
+
+    async Task InvStream()
+    {
+        try
+        {
+            InvButtonDisabled = true;            
+            if (!mStreamRunning)
+            {
+                // Set UI state while starting
+                InvStreamButtonText = "Starting..";
+                InvStatusText = "";
+                lock (InventoriedTags)
+                    InventoriedTags.Clear();
+
+                // Start inventory stream in own task
+                await Task.Run(() =>
+                {
+                    // Enable zero readings for stats update
+                    NurApiInst.EnableInvStreamZeros = true;
+                    // Clear tag storage
+                    NurApiInst.ClearTagsEx();
+                    // Start stream
+                    NurApiInst.StartInventoryStream();
+                    mStreamRunning = true;
+                });
+            }
+            else
+            {
+                // Set UI while stopping
+                InvStreamButtonText = "Stopping..";
+
+                // Stop stream in own task
+                await Task.Run(() =>
+                {
+                    mStreamRunning = false;
+                    // Stop
+                    NurApiInst.StopInventoryStream();
+                    // Reset zero readings
+                    NurApiInst.EnableInvStreamZeros = false;
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            InvStatusText = $"ERROR: {ex.ToString()}";
+        }
+        finally
+        {
+            // Update UI
+            InvButtonDisabled = !NurApiInst.IsConnected();
+            if (mStreamRunning)
+                InvStreamButtonText = "Stop Inventory Stream";
+            else
+                InvStreamButtonText = "Start Inventory Stream";
+
+            await this.InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private void NurApi_ConnectionStatusEvent(object? sender, NurTransportStatus e)
+    {
+        // Update UI
+        mStreamRunning = false;
+        InvButtonDisabled = (e != NurTransportStatus.Connected);
+        InvStreamButtonText = "Start Inventory Stream";
+
+        this.InvokeAsync(() => StateHasChanged());
+    }
+}

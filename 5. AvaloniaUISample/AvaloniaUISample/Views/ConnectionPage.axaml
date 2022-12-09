@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:AvaloniaUISample.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AvaloniaUISample.Views.ConnectionPage">
+
+	<Design.DataContext>
+		<vm:ConnectionPageViewModel/>
+	</Design.DataContext>
+
+	<StackPanel>
+		<StackPanel Spacing="5" Orientation="Horizontal">
+			<TextBlock Padding="0,10,0,10" VerticalAlignment="Center" Foreground="Black" Text="Connection status: "/>
+			<TextBlock Padding="0,10,0,10" VerticalAlignment="Center" Foreground="Black" Text="{Binding ConnectionStatusText}"/>
+		</StackPanel>
+
+		<TextBlock Padding="0,10,0,0" VerticalAlignment="Center" Foreground="Black" Text="Connection Uri"/>
+		<StackPanel Spacing="5" Orientation="Horizontal">
+			<TextBox Width="300" Text="{Binding ConnectionUri}"/>
+			<Button Command="{Binding ConnectDeviceCmd}" Content="{Binding ConnectButtonText}"/>
+		</StackPanel>
+
+		<TextBlock Padding="0,10,0,0" VerticalAlignment="Center" Foreground="Black" Text="Available devices"/>
+		<ListBox Items="{Binding FoundDevices}" SelectedItem="{Binding SelectedDevice}">
+		</ListBox>
+    </StackPanel>
+</UserControl>

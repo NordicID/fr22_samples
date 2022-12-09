@@ -1,0 +1,8 @@
+{
+  "name": "@APPNAME@",
+  "version": "@APPVERSION@",
+  "startup": {
+    "exec_start": "/bin/sh bin/start.sh",
+    "default_autostart": true
+  }
+}

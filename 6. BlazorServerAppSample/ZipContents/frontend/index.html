@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>BlazorSample</title>
+</head>
+<body>
+    Click link to open blazor app:<br/>
+	<a id="link" href="#" target="_blank">BlazorSample</a><br/>
+	<script>
+			var a = document.getElementById('link');
+			a.href = 'http://'+window.location.hostname+':5555';
+	</script>
+</body>
+</html>

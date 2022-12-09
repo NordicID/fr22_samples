@@ -1,8 +1,8 @@
 {
-  "name": "HelloWorld",
-  "version": "1.0.0",
+  "name": "@APPNAME@",
+  "version": "@APPVERSION@",
   "startup": {
-    "exec_start": "mono bin/HelloWorld.exe",
+    "exec_start": "mono bin/@APPEXEC@",
     "depends": {
       "plugins": [
         "mono-api-4.8"
