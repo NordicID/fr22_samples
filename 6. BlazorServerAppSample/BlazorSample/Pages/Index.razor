@@ -49,15 +49,25 @@ else
     private string ConnectionStatusText { get; set; } = string.Empty;
     private string ConnectButtonText { get; set; } = string.Empty;
 
+    private static bool FirstCall = true;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
         FoundDevices = new List<Uri>();
-        FoundDevices.Add(new Uri("tcp://localhost"));
 
         NurDeviceDiscovery.Start(DeviceDiscoveryCallback);
         NurApiInst.ConnectionStatusEvent += NurApiInst_ConnectionStatusEvent;
 
+        // Check if integrated reader (running in nordic id products) is available and connect to it
+        if (FirstCall && NurTransportRegistry.Contains("int"))
+        {
+            FirstCall = false;
+            ConnectionUri = "int://integrated_reader";
+            NurApiInst.Connect(ConnectionUri);
+        }
+
+        // Update UI
         NurApiInst_ConnectionStatusEvent(NurApiInst, NurApiInst.ConnectionStatus);
     }
 
@@ -84,6 +94,7 @@ else
             {
                 ConnectionStatusText = $"Connected with error {ex.Message}";
             }
+            ConnectionUri = api.LastConnectUri.ToString();
         }
         else
         {
@@ -132,17 +143,19 @@ else
         if (FoundDevices == null)
             return;
 
-        Uri? item = FoundDevices.FirstOrDefault(u => u.ToString() == args.Uri.ToString());
-
-        if (args.Visible)
+        lock (FoundDevices)
         {
-            FoundDevices.Add(args.Uri);
-        }
-        else if (item != null)
-        {
-            FoundDevices.Remove(item);
-        }
+            Uri? item = FoundDevices.FirstOrDefault(u => u.ToString() == args.Uri.ToString());
 
+            if (args.Visible)
+            {
+                FoundDevices.Add(args.Uri);
+            }
+            else if (item != null)
+            {
+                FoundDevices.Remove(item);
+            }
+        }
         this.InvokeAsync(() => StateHasChanged());
     }
 }

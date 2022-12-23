@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Configurations>Debug;Release;Release_FR22</Configurations>
+    <Version>$(VersionPrefix)1.0.1</Version>
   </PropertyGroup>
 
   <Target Condition="'$(Configuration)' == 'Release_FR22'" Name="GenerateFr22Zip" AfterTargets="Publish">
@@ -12,9 +13,7 @@
   </Target>
 
   <ItemGroup>
-    <Reference Include="NordicID.NurApi.Net">
-      <HintPath>..\..\NordicID.NurApi.Net\NordicID.NurApi.Net.dll</HintPath>
-    </Reference>
+    <PackageReference Include="NordicID.NurApi.Net" Version="4.0.0" />
   </ItemGroup>
 
 </Project>

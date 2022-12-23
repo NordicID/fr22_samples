@@ -29,7 +29,7 @@ namespace AvaloniaUISample.ViewModels
             }
         }
 
-        string mConnectionUri = "tcp://localhost/";
+        string mConnectionUri = "";
         public string ConnectionUri
         {
             get => mConnectionUri;
@@ -57,9 +57,15 @@ namespace AvaloniaUISample.ViewModels
 
             App.NurApi.ConnectionStatusEvent += NurApi_ConnectionStatusEvent;
 
-            FoundDevices.Add(new Uri("tcp://localhost"));
             if (!Design.IsDesignMode)
                 NurDeviceDiscovery.Start(DeviceDiscoveryCallback);
+
+            // Check if integrated reader (running in nordic id products) is available and connect to it
+            if (NurTransportRegistry.Contains("int"))
+            {
+                ConnectionUri = "int://integrated_reader";
+                App.NurApi.Connect(ConnectionUri);
+            }
         }
 
         private void NurApi_ConnectionStatusEvent(object ?sender, NurTransportStatus e)
@@ -102,12 +108,10 @@ namespace AvaloniaUISample.ViewModels
 
                 if (args.Visible)
                 {
-                    Debug.WriteLine($"ADD '{args.Uri}'");
                     FoundDevices.Add(args.Uri);
                 } 
                 else if (item != null)
                 {
-                    Debug.WriteLine($"DEL '{args.Uri}'");
                     FoundDevices.Remove(item);
                 }
             }));

@@ -91,6 +91,9 @@ namespace AvaloniaUISample.ViewModels
             mUiUpdateTimer = new DispatcherTimer();
             mUiUpdateTimer.Tick += MUiUpdateTimer_Tick;
             mUiUpdateTimer.Interval = TimeSpan.FromMilliseconds(250);
+
+            // Update UI
+            NurApi_ConnectionStatusEvent(App.NurApi, App.NurApi.ConnectionStatus);
         }
 
         private void NurApi_ConnectionStatusEvent(object? sender, NurTransportStatus e)
