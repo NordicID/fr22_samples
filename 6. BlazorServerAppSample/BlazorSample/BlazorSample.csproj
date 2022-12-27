@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Configurations>Debug;Release;Release_FR22</Configurations>
-    <Version>$(VersionPrefix)1.0.1</Version>
+    <Version>$(VersionPrefix)1.0.2</Version>
   </PropertyGroup>
 
   <Target Condition="'$(Configuration)' == 'Release_FR22'" Name="GenerateFr22Zip" AfterTargets="Publish">
