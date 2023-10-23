@@ -25,13 +25,15 @@ def getJson(fpath, ignore = None):
                     del entry[ign]
     return entry
 
-def  updateDependencies(release, fpath):
-    entry = getJson(fpath)
-    if 'depends' in entry:
+def updateDependencies(release, depends):
+    if depends:
         if not 'depends' in release:
-            release['depends'] = entry['depends']
+            release['depends'] = depends
         else:
-            release['depends'].update(entry['depends'])
+            release['depends'].update(depends)
+
+def updateDependenciesJson(release, fpath):
+    updateDependencies(release, getJson(fpath).get('depends'))
 
 def readManifest(fpath):
     with ZipFile(fpath, 'r') as z:
@@ -61,10 +63,9 @@ def getPlugins(zipEntries, folder):
             try:
                 name, version, depends = readManifest(fpath)
                 release = { "version": version, "url": url}
-                if depends:
-                    release["depends"] = depends
-                updateDependencies(release, path_join('meta', folder, name + '.json'))
-                updateDependencies(release, path_join('meta', folder, name, version + '.json'))
+                updateDependenciesJson(release, path_join('meta', folder, name + '.json'))
+                updateDependenciesJson(release, path_join('meta', folder, name, version + '.json'))
+                updateDependencies(release, depends)
             except Exception as e:
                 print(' -', url, '- IGNORED :', e, file=stderr)
             else:
@@ -76,13 +77,21 @@ def getPlugins(zipEntries, folder):
                 else:
                     # Sort by version
                     rel_ver = parse_version(version)
-                    idx = len(index[name]['releases'])
+                    rels = index[name]['releases']
+                    idx = len(rels)
                     for i in range(idx):
-                        i_ver = parse_version(index[name]['releases'][i]['version'])
+                        i_ver = parse_version(rels[i]['version'])
                         if rel_ver > i_ver:
                             idx = i
                             break
                         elif i_ver == rel_ver:
+                            if 'platform' in rels[i].get('depends', {}) and 'platform' in release.get('depends', {}):
+                                if rels[i]['depends']['platform'] != release['depends']['platform']:
+                                    # Let sc20 be the last one for backward compatibility
+                                    if rels[i]['depends']['platform'] == 'sc20':
+                                        idx = i
+                                        break
+                                    continue
                             raise RuntimeError(f"Duplicate version of {folder} {name} {version}")
                     index[name]['releases'].insert(idx, release)
     index_list = []
@@ -115,6 +124,9 @@ def getFirmwares(zipEntries, folder):
                     idx = i
                     break
                 elif i_ver == rel_ver:
+                    if 'platform' in index[i].get('depends', {}) and 'platform' in fw.get('depends', {}):
+                        if index[i]['depends']['platform'] != fw['depends']['platform']:
+                            continue
                     raise RuntimeError(f"Duplicate version of {folder} {fw['version']}")
             index.insert(idx, fw)
             print(' +', fw['url'])
