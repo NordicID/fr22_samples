@@ -52,7 +52,11 @@ def readManifest(fpath):
                             break
                     if not found:
                         depends[dep_type].append({'name': dep_name})
-    return manifest['name'], manifest['version'], depends
+    ret = { k: manifest[k] for k in ('name', 'version') }
+    ret['depends'] = depends
+    for k in ('display_name', 'description'):
+        ret[k] = manifest.get(k)
+    return ret
 
 def getPlugins(zipEntries, folder):
     index = {}
@@ -61,11 +65,13 @@ def getPlugins(zipEntries, folder):
             fpath = path_join(dir, f)
             url = '/'.join(fpath.split(os.sep)[1:])
             try:
-                name, version, depends = readManifest(fpath)
+                manifest = readManifest(fpath)
+                name = manifest['name']
+                version = manifest['version']
                 release = { "version": version, "url": url}
                 updateDependenciesJson(release, path_join('meta', folder, name + '.json'))
                 updateDependenciesJson(release, path_join('meta', folder, name, version + '.json'))
-                updateDependencies(release, depends)
+                updateDependencies(release, manifest['depends'])
             except Exception as e:
                 print(' -', url, '- IGNORED :', e, file=stderr)
             else:
@@ -94,6 +100,9 @@ def getPlugins(zipEntries, folder):
                                     continue
                             raise RuntimeError(f"Duplicate version of {folder} {name} {version}")
                     index[name]['releases'].insert(idx, release)
+                for k in ('display_name', 'description'):
+                    if k not in index[name] and manifest[k]:
+                        index[name][k] = manifest[k]
     index_list = []
     for plg_name, plg in index.items():
         plugin = { 'name': plg_name }
