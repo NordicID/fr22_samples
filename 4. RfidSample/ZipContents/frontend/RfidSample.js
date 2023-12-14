@@ -112,7 +112,7 @@ function tagsTable() {
 					let tags = json['tags'];
 					for (var id in tags) {
 						let r = tags[id];
-						v.push([id, r.epc, r.antennaId, r.rssi, r.phaseDiff, r.timesSeen]);
+						v.push([id, r.epc, r.data, r.antennaId, r.rssi, r.phaseDiff, r.timesSeen]);
 					}
 				}
 				if ('updateEnabled' in json && json['updateEnabled']) {

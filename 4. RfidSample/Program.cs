@@ -15,6 +15,7 @@ namespace RfidSample
         class TagEntry
         {
             public string epc;
+            public string data;
             public byte antennaId;
             public sbyte rssi;
             public short phaseDiff;
@@ -330,6 +331,7 @@ namespace RfidSample
                         {
                             _tagsSeen[tag.epc] = new TagEntry() {
                                 epc = BitConverter.ToString(tag.epc).Replace("-", ""),
+                                data = tag.GetDataString(), // InventoryRead data is stored in tag.GetDataString() (or tag.irData)
                                 antennaId = tag.antennaId,
                                 rssi = tag.rssi,
                                 phaseDiff = (short)tag.timestamp,
@@ -362,6 +364,13 @@ namespace RfidSample
         #endregion
         void StartTagStream()
         {
+            // Enable inventory read.
+            // Read 4 words from TID bank during inventory.
+            // TID words available in reported tag data field, see tag.GetDataString() in OnInventoryStreamEvent()
+            //
+            // When data reading is not needed, use "_nur.InventoryReadCtl = false" to disable data reading during inventory
+            _nur.InventoryRead(true, NurApi.NUR_IR_EPCDATA, NurApi.BANK_TID, 0, 4);
+
             // TODO: fix when NUR_OPFLAGS_EN_PHASE_DIFF/NUR_DC_PHASEDIFF has been added to NurApiDotNet
             // tag phase diff support (NUR_OPFLAGS_EN_PHASE_DIFF = (1 << 17)) isn't yet available in
             // NurApiDotNet; just assume it is supported in the NUR module and turn it on
