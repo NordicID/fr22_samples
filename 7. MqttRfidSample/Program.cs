@@ -21,7 +21,7 @@ namespace MqttRfidSample
         public string? Username { get; set; } = null;
         public string? Password { get; set; } = null;
         public bool AllowUntrustedCertificates { get; set; } = false;
-        public string TopicPrefix { get; set; } = "api/application/MqttRfidSample";
+        public string TopicPrefix { get; set; } = "MqttRfidSample";
         public string RfidReaderUri { get; set; } = "tcp://localhost:4333";
 
         public static MqttConfig LoadFromFile(string filePath)

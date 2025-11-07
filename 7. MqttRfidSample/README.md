@@ -1,10 +1,10 @@
 ## MqttRfidSample
 
-Console application demonstrating RFID reader control via MQTT messaging.
+Console application for FR22/Sampo S3 RFID reader control via MQTT messaging.
 
-Application uses .NET 8.0 runtime, installed from FR22 app center.
+This is an installable application package for FR22/Sampo S3 devices. The application uses .NET 8.0 runtime, which must be installed from the FR22/Sampo S3 app center.
 
-The application connects to an RFID reader and exposes MQTT endpoints for remote control and integration.
+The application connects to an RFID reader NUR-module and exposes MQTT endpoints for remote control and integration.
 
 ### Features
 
@@ -33,7 +33,7 @@ The application is configured using `settings.json` file, which is created autom
   "Username": null,
   "Password": null,
   "AllowUntrustedCertificates": false,
-  "TopicPrefix": "api/application/MqttRfidSample",
+  "TopicPrefix": "MqttRfidSample",
   "RfidReaderUri": "tcp://localhost:4333"
 }
 ```
@@ -65,7 +65,7 @@ To modify configuration:
 
 ### MQTT Endpoints
 
-**Topic Prefix Configuration:** The default topic prefix is `api/application/MqttRfidSample` but can be configured in `settings.json`. All endpoints below are relative to this configured prefix.
+**Topic Prefix Configuration:** The default topic prefix is `MqttRfidSample` but can be configured in `settings.json`. All endpoints below are relative to this configured prefix.
 
 The application exposes the following endpoints (prefix with your configured topic):
 
@@ -95,19 +95,19 @@ The application exposes the following endpoints (prefix with your configured top
 
 All MQTT requests must include `id` (unique request identifier) and `client` (your client name) fields. Responses are published to `api/application/<client>` topic.
 
-**Note:** Examples below use the default topic prefix `api/application/MqttRfidSample`. If you configure a different topic prefix in `settings.json`, replace it accordingly in all examples.
+**Note:** Examples below use the default topic prefix `MqttRfidSample`. If you configure a different topic prefix in `settings.json`, replace it accordingly in all examples.
 
 #### Using MQTT Explorer (recommended for Windows users)
 
 1. Download and install [MQTT Explorer](http://mqtt-explorer.com/)
 2. Connect to the MQTT broker (e.g., `device_ip_address:port`)
 3. Subscribe to response topic: `api/application/mytest`
-4. Publish to `api/application/MqttRfidSample/rfid/connect` to connect the reader NUR module with payload:
+4. Publish to `MqttRfidSample/rfid/connect` to connect the reader NUR module with payload:
 ```json
    {"id": "req1", "client": "mytest"}
    ```
-5. Verify the connection: `api/application/MqttRfidSample/rfid/connected`
-6. Get NUR module information: `api/application/MqttRfidSample/rfid/readerinfo`
+5. Verify the connection: `MqttRfidSample/rfid/connected`
+6. Get NUR module information: `MqttRfidSample/rfid/readerinfo`
 7. View response in subscribed topic
 
 #### Using mosquitto command line tools
@@ -120,13 +120,13 @@ mosquitto_sub -h <broker-ip> -t "api/application/mytest"
 Send requests (in another terminal):
 ```bash
 # Connect to RFID reader
-mosquitto_pub -h <broker-ip> -t "api/application/MqttRfidSample/rfid/connect" -m '{"id":"req1","client":"mytest"}'
+mosquitto_pub -h <broker-ip> -t "MqttRfidSample/rfid/connect" -m '{"id":"req1","client":"mytest"}'
 
 # Start tag streaming
-mosquitto_pub -h <broker-ip> -t "api/application/MqttRfidSample/tags/startStream" -m '{"id":"req2","client":"mytest"}'
+mosquitto_pub -h <broker-ip> -t "MqttRfidSample/tags/startStream" -m '{"id":"req2","client":"mytest"}'
 
 # Get inventory
-mosquitto_pub -h <broker-ip> -t "api/application/MqttRfidSample/inventory/get" -m '{"id":"req3","client":"mytest"}'
+mosquitto_pub -h <broker-ip> -t "MqttRfidSample/inventory/get" -m '{"id":"req3","client":"mytest"}'
 ```
 
 #### With TLS/Authentication
@@ -138,7 +138,7 @@ If you configured TLS and authentication in `settings.json`:
 mosquitto_sub -h <broker-ip> -p 8883 --cafile ca.crt -u username -P password -t "api/application/mytest"
 
 # Publish with TLS and auth
-mosquitto_pub -h <broker-ip> -p 8883 --cafile ca.crt -u username -P password -t "api/application/MqttRfidSample/rfid/connect" -m '{"id":"req1","client":"mytest"}'
+mosquitto_pub -h <broker-ip> -p 8883 --cafile ca.crt -u username -P password -t "MqttRfidSample/rfid/connect" -m '{"id":"req1","client":"mytest"}'
 ```
 
 ### Generating FR22 application package
