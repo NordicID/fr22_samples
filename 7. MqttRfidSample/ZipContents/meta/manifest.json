@@ -1,0 +1,13 @@
+{
+  "name": "@APPNAME@",
+  "version": "1.0.0",
+  "startup": {
+    "exec_start": "dotnet bin/MqttRfidSample.dll",
+    "default_autostart": true,
+    "depends": {
+      "plugins": [
+        "dotnet8"
+      ]
+    }
+  }
+}
