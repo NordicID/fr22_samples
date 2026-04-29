@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MultipartDemo</RootNamespace>
+    <AssemblyName>MultipartDemo</AssemblyName>
+    <Version>1.0.0</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NordicID.NurApi.Net" Version="6.0.4" />
+    <PackageReference Include="NidRpc" Version="1.1.0" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="PowerShell -NoProfile -ExecutionPolicy unrestricted -file &quot;$(ProjectDir)\..\fr22_vs_appziptool\build.ps1&quot; &quot;$(ProjectDir)\ZipContents&quot; &quot;$(ProjectName)&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)\&quot; &quot;$(ProjectDir)\&quot;" />
+  </Target>
+
+</Project>

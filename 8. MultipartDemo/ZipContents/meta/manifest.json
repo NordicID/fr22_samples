@@ -1,0 +1,13 @@
+{
+  "name": "@APPNAME@",
+  "version": "@APPVERSION@",
+  "startup": {
+    "exec_start": "dotnet bin/MultipartDemo.dll",
+    "default_autostart": true,
+    "depends": {
+      "plugins": [
+        "dotnet8"
+      ]
+    }
+  }
+}
