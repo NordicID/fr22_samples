@@ -112,6 +112,36 @@ def getPlugins(zipEntries, folder):
 
 def getFirmwares(zipEntries, folder):
     index = []
+    for dir, _, files in os.walk(path_join('repo', folder)):
+        for f in files:
+            fpath = path_join(dir, f)
+            url = '/'.join(fpath.split(os.sep)[1:])
+            try:
+                with ZipFile(fpath, 'r') as z:
+                    manifest = json.loads(z.read('manifest.json'))
+                fw = { k: manifest[k] for k in ('version', 'depends', 'description') }
+                fw['url'] = url
+                machine = fw['depends']['machine']
+                version = fw['version']
+            except Exception as e:
+                pass
+            else:
+                # Sort by version
+                rel_ver = parse_version(version)
+                idx = len(index)
+                for i in range(idx):
+                    i_ver = parse_version(index[i]['version'])
+                    if rel_ver > i_ver:
+                        idx = i
+                        break
+                    elif i_ver == rel_ver:
+                        if index[i]['depends']['machine'] != machine:
+                            continue
+                        raise RuntimeError(f"Duplicate version of {folder} {version} for {machine}")
+                index.insert(idx, fw)
+                print(' +', url)
+                if fpath:
+                    zipEntries.append((fpath, url))
     for dir, _, files in os.walk(path_join('meta', folder)):
         for f in files:
             fw = getJson(path_join(dir, f))
