@@ -86,6 +86,9 @@ The application exposes the following endpoints (prefix with your configured top
   - Response: `{"success": true/false, "error": "..."}`
 - `/tags/clearTags` - Clear tag storage
   - Response: `{"success": true/false, "error": "..."}`
+- `/tags/writeEpc` - Write a new EPC to a tag identified by its current EPC
+  - Response: `{"success": true/false, "error": "..."}`
+  - Add `currentEpc` and `newEpc` (hex strings) to the request payload. Writes the EPC and the PC word together. Targets the single tag whose EPC matches `currentEpc`; for reliable writes keep only that tag in the antenna field. If a stream is running (`/tags/startStream`), stop it first with `/tags/stopStream` to free the radio.
 
 #### Inventory Management
 - `/inventory/get` - Get current inventory data
@@ -127,6 +130,9 @@ mosquitto_pub -h <broker-ip> -t "MqttRfidSample/tags/startStream" -m '{"id":"req
 
 # Get inventory
 mosquitto_pub -h <broker-ip> -t "MqttRfidSample/inventory/get" -m '{"id":"req3","client":"mytest"}'
+
+# Write a new EPC to a tag (identified by its current EPC)
+mosquitto_pub -h <broker-ip> -t "MqttRfidSample/tags/writeEpc" -m '{"id":"req4","client":"mytest","currentEpc":"E2000017221101441890B1E1","newEpc":"E2000017221101441890FFFF"}'
 ```
 
 #### With TLS/Authentication

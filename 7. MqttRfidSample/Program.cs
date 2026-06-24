@@ -525,6 +525,10 @@ namespace MqttRfidSample
                 {
                     await HandleClearTagStorage(requestId, client);
                 }
+                else if (topic.EndsWith("/tags/writeEpc"))
+                {
+                    await HandleTagsWriteEpc(requestId, client, json);
+                }
                 else if (topic.EndsWith("/inventory/get"))
                 {
                     await HandleInventoryGet(requestId, client);
@@ -691,6 +695,42 @@ namespace MqttRfidSample
             catch (NurApiException ex)
             {
                 Console.WriteLine($"[ClearTagStorage] Failed: {ex.Message}");
+                result = new JObject
+                {
+                    ["success"] = false,
+                    ["error"] = ex.Message
+                };
+            }
+
+            if (!string.IsNullOrEmpty(requestId) && !string.IsNullOrEmpty(client))
+            {
+                await PublishResponseAsync(client, requestId, result);
+            }
+        }
+
+        private async Task HandleTagsWriteEpc(string? requestId, string? client, JObject json)
+        {
+            Console.WriteLine("[TagsWriteEpc] Request");
+
+            JObject result;
+            try
+            {
+                var currentEpc = json["currentEpc"]?.ToString();
+                var newEpc = json["newEpc"]?.ToString();
+
+                if (string.IsNullOrEmpty(currentEpc) || string.IsNullOrEmpty(newEpc))
+                {
+                    throw new ArgumentException("'currentEpc' and 'newEpc' are required (hex strings)");
+                }
+
+                await Task.Run(() => _nur.WriteEPCByEPC(0, false, currentEpc, newEpc));
+
+                Console.WriteLine($"[TagsWriteEpc] Wrote EPC {currentEpc} -> {newEpc}");
+                result = new JObject { ["success"] = true };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TagsWriteEpc] Failed: {ex.Message}");
                 result = new JObject
                 {
                     ["success"] = false,
